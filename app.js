@@ -408,28 +408,65 @@ function extractDominantColor(dataUrl, callback) {
     img.src = dataUrl;
 }
 
+function compressImage(dataUrl, callback) {
+    const img = new Image();
+    img.onload = function() {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        
+        // Resize to a maximum dimension of 600px
+        const maxDim = 600;
+        let width = img.width;
+        let height = img.height;
+        
+        if (width > height) {
+            if (width > maxDim) {
+                height = Math.round((height * maxDim) / width);
+                width = maxDim;
+            }
+        } else {
+            if (height > maxDim) {
+                width = Math.round((width * maxDim) / height);
+                height = maxDim;
+            }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Compress to JPEG at 75% quality (reduces size from 5MB to ~50KB)
+        const compressedData = canvas.toDataURL("image/jpeg", 0.75);
+        callback(compressedData);
+    };
+    img.src = dataUrl;
+}
+
 // Convert uploaded image
 imageUploader.addEventListener("change", (e) => {
     const file = e.target.files[0];
     if (file && uploadTargetMember) {
         const reader = new FileReader();
         reader.onload = function(evt) {
-            const dataUrl = evt.target.result;
+            const rawDataUrl = evt.target.result;
             
-            const imgEl = document.getElementById(`img-${uploadTargetMember}`);
-            if (imgEl) imgEl.src = dataUrl;
-            
-            const drawerImg = document.getElementById("drawer-img");
-            if (drawerImg && activeMemberId === uploadTargetMember) drawerImg.src = dataUrl;
+            // Compress the image first
+            compressImage(rawDataUrl, (compressedDataUrl) => {
+                const imgEl = document.getElementById(`img-${uploadTargetMember}`);
+                if (imgEl) imgEl.src = compressedDataUrl;
+                
+                const drawerImg = document.getElementById("drawer-img");
+                if (drawerImg && activeMemberId === uploadTargetMember) drawerImg.src = compressedDataUrl;
 
-            saveChange(uploadTargetMember, "image", dataUrl);
+                saveChange(uploadTargetMember, "image", compressedDataUrl);
 
-            extractDominantColor(dataUrl, (color) => {
-                saveChange(uploadTargetMember, "bgColor", color);
-                const capsuleEl = document.getElementById(`capsule-${uploadTargetMember}`);
-                if (capsuleEl) {
-                    capsuleEl.style.backgroundColor = color;
-                }
+                extractDominantColor(compressedDataUrl, (color) => {
+                    saveChange(uploadTargetMember, "bgColor", color);
+                    const capsuleEl = document.getElementById(`capsule-${uploadTargetMember}`);
+                    if (capsuleEl) {
+                        capsuleEl.style.backgroundColor = color;
+                    }
+                });
             });
         };
         reader.readAsDataURL(file);
