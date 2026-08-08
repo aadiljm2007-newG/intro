@@ -168,8 +168,7 @@ async function saveChange(memberId, field, value) {
     if (isSupabaseActive && supabaseClient) {
         const { error } = await supabaseClient
             .from('team_directory')
-            .update({ data: MEMBERS_DATA })
-            .eq('id', 1);
+            .upsert({ id: 1, data: MEMBERS_DATA });
         if (error) {
             console.error("Supabase update failed:", error);
         } else {
@@ -613,7 +612,10 @@ async function initDatabase() {
 
         if (error || !data) {
             console.log("No data found on Supabase. Seeding default data...");
-            await supabaseClient.from('team_directory').insert({ id: 1, data: DEFAULT_MEMBERS_DATA });
+            const { error: seedError } = await supabaseClient
+                .from('team_directory')
+                .upsert({ id: 1, data: DEFAULT_MEMBERS_DATA });
+            if (seedError) console.error("Database seeding failed:", seedError);
             MEMBERS_DATA = DEFAULT_MEMBERS_DATA;
         } else {
             MEMBERS_DATA = data.data;
