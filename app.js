@@ -389,7 +389,33 @@ function triggerImageUpload(memberId) {
 
 function triggerAudioUpload(memberId) {
     uploadTargetMember = memberId;
-    audioUploader.click();
+    const input = prompt("To upload a local audio file, type '1'. To use an online song, paste the direct audio link (starts with http/https) below:");
+    
+    if (input === null) return;
+    
+    const trimmed = input.trim();
+    if (trimmed === "1") {
+        audioUploader.click();
+    } else if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+        // Extract filename from URL as the track name
+        let title = trimmed.split("/").pop().split("?")[0] || "Online Track";
+        if (title.length > 30 || !title.includes(".")) title = "Linked Audio Track";
+        
+        saveChange(memberId, "songUrl", trimmed);
+        saveChange(memberId, "songTitle", title);
+
+        if (activeMemberId === memberId) {
+            const audioTitle = document.getElementById("drawer-audio-title");
+            if (audioTitle) audioTitle.textContent = title;
+            
+            const audioPlayer = document.getElementById("drawer-audio-element");
+            audioPlayer.src = trimmed;
+            audioPlayer.style.display = "block";
+            audioPlayer.play();
+        }
+    } else {
+        alert("Invalid input! Please paste a link starting with http:// or https://, or type '1' to upload a file.");
+    }
 }
 
 function extractDominantColor(dataUrl, callback) {
