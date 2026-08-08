@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Minimalist retro-brutalist team showcase featuring staggered capsule layouts.">
+    <title>THE TEAM // DIRECTORY</title>
+    <link rel="stylesheet" href="index.css">
+    <!-- Clean, bold geometric fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    
+    <!-- Load standard Supabase bundle (works offline/locally over file://) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="team-container">
+        <h1 class="visually-hidden">Team Members Directory</h1>
+        
+        <!-- Hidden file inputs for editing media -->
+        <input type="file" id="image-uploader" accept="image/*" style="display: none;">
+        <input type="file" id="audio-uploader" accept="audio/*" style="display: none;">
+
+        <div class="team-layout-wrapper">
+            <!-- Large editable background title -->
+            <div class="page-title-container">
+                <h2 class="main-page-title" data-member="global" data-field="pageTitle" id="page-title">THE CREW</h2>
+            </div>
+
+            <div class="capsules-wrapper">
+                <!-- Shamini Capsule -->
+                <div class="capsule theme-pink" id="capsule-shamini">
+                    <div class="capsule-info">
+                        <h2 class="member-name" data-member="shamini" data-field="name">SHAMINI</h2>
+                        <span class="member-role" data-member="shamini" data-field="role">R&D</span>
+                    </div>
+                    <div class="capsule-image-container">
+                        <img src="shamini.png" alt="Shamini Portrait" class="member-image" data-member="shamini" id="img-shamini">
+                    </div>
+                </div>
+
+                <!-- Tejaswi Capsule -->
+                <div class="capsule theme-sage" id="capsule-tejaswi">
+                    <div class="capsule-info">
+                        <h2 class="member-name" data-member="tejaswi" data-field="role">TEJASWI</h2>
+                        <span class="member-role" data-member="tejaswi" data-field="role">Backend</span>
+                    </div>
+                    <div class="capsule-image-container">
+                        <img src="tejaswi.png" alt="Tejaswi Portrait" class="member-image" data-member="tejaswi" id="img-tejaswi">
+                    </div>
+                </div>
+
+                <!-- Sarvesh Capsule -->
+                <div class="capsule theme-cream" id="capsule-sarvesh">
+                    <div class="capsule-info">
+                        <h2 class="member-name" data-member="sarvesh" data-field="name">SARVESH</h2>
+                        <span class="member-role" data-member="sarvesh" data-field="role">Database</span>
+                    </div>
+                    <div class="capsule-image-container">
+                        <img src="sarvesh.png" alt="Sarvesh Portrait" class="member-image" data-member="sarvesh" id="img-sarvesh">
+                    </div>
+                </div>
+
+                <!-- Aadil Capsule -->
+                <div class="capsule theme-yellow" id="capsule-aadil">
+                    <div class="capsule-info">
+                        <h2 class="member-name" data-member="aadil" data-field="name">AADIL</h2>
+                        <span class="member-role" data-member="aadil" data-field="role">Frontend</span>
+                    </div>
+                    <div class="capsule-image-container">
+                        <img src="aadil.png" alt="Aadil Portrait" class="member-image" data-member="aadil" id="img-aadil">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Bottom/Overlay Drawer for Member Detail View -->
+    <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()">
+        <div class="drawer-content" onclick="event.stopPropagation()">
+            <button class="close-drawer-btn" onclick="closeDrawer()" aria-label="Close details">✕ CLOSE</button>
+            <div class="drawer-body">
+                <div class="drawer-profile-row">
+                    <div class="drawer-portrait-container">
+                        <img id="drawer-img" class="drawer-portrait" alt="Member Detail Portrait">
+                    </div>
+                    <div class="drawer-header">
+                        <h3 id="drawer-name" data-member="" data-field="drawer-name">MEMBER NAME</h3>
+                        <span id="drawer-role" data-member="" data-field="drawer-role">MEMBER ROLE</span>
+                    </div>
+                </div>
+
+                <hr class="drawer-divider">
+
+                <!-- Audio Track Section -->
+                <div class="drawer-audio-section">
+                    <div class="audio-label">CHOSEN TRACK (Right-click to upload)</div>
+                    <div class="audio-title-row">
+                        <span class="audio-icon">🎵</span>
+                        <span id="drawer-audio-title" data-member="" data-field="drawer-song-title">Default Synth Track</span>
+                    </div>
+                    <audio id="drawer-audio-element" controls class="custom-audio-player"></audio>
+                </div>
+
+                <hr class="drawer-divider">
+
+                <div class="bio-section">
+                    <div class="section-label">SELF INTRODUCTION</div>
+                    <p id="drawer-bio" data-member="" data-field="drawer-bio">Bio loading...</p>
+                </div>
+
+                <hr class="drawer-divider">
+
+                <div class="skills-section">
+                    <div class="skills-header-row">
+                        <div class="section-label">SKILLS & COMPETENCIES (Right-click name/value, click bar)</div>
+                        <button class="add-skill-btn" onclick="addNewSkill()" aria-label="Add new skill">+ ADD</button>
+                    </div>
+                    <div class="drawer-stats" id="drawer-stats">
+                        <!-- Dynamic stats bars -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load standard script without module type -->
+    <script src="app.js"></script>
+</body>
+</html>
