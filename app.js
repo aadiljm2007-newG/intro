@@ -180,6 +180,54 @@ async function saveChange(memberId, field, value) {
     }
 }
 
+function getYouTubeId(url) {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+}
+
+function loadAudioPlayer(data) {
+    const container = document.getElementById("audio-player-container");
+    if (!container) return;
+    
+    stopSynthMelody();
+    const ytId = getYouTubeId(data.songUrl);
+    
+    if (ytId) {
+        // Render YouTube Embed Iframe
+        container.innerHTML = `
+            <iframe id="drawer-yt-element" width="100%" height="80" 
+                src="https://www.youtube.com/embed/${ytId}?autoplay=0" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen 
+                style="border: 2px solid #000; border-radius: 6px; box-shadow: 2px 2px 0px 0px #000; margin-top: 8px;">
+            </iframe>
+        `;
+    } else {
+        // Render standard audio element
+        container.innerHTML = `
+            <audio id="drawer-audio-element" controls class="custom-audio-player" style="display: ${data.songUrl ? 'block' : 'none'}; width: 100%; margin-top: 8px;"></audio>
+        `;
+        
+        const audioPlayer = document.getElementById("drawer-audio-element");
+        if (data.songUrl) {
+            audioPlayer.src = data.songUrl;
+        }
+
+        // Rebind play triggers
+        audioPlayer.addEventListener("play", () => {
+            if (!audioPlayer.src) {
+                playSynthMelody(activeMemberId);
+            }
+        });
+        audioPlayer.addEventListener("pause", () => {
+            stopSynthMelody();
+        });
+    }
+}
+
 // 5. Interactive Detail Drawer Logic
 let activeMemberId = null;
 
@@ -189,8 +237,6 @@ function selectMember(id) {
     if (!data) return;
 
     // Stop previous audio
-    const audioPlayer = document.getElementById("drawer-audio-element");
-    audioPlayer.pause();
     stopSynthMelody();
 
     // Populate drawer elements
@@ -213,14 +259,8 @@ function selectMember(id) {
     audioTitleEl.textContent = data.songTitle;
     audioTitleEl.setAttribute("data-member", id);
 
-    // Setup Audio Player Source
-    if (data.songUrl) {
-        audioPlayer.src = data.songUrl;
-        audioPlayer.style.display = "block";
-    } else {
-        audioPlayer.src = "";
-        audioPlayer.style.display = "none";
-    }
+    // Setup Audio Player Source dynamically
+    loadAudioPlayer(data);
 
     renderDrawerStats(id, data);
 
@@ -298,22 +338,20 @@ window.addNewSkill = function() {
 
 window.closeDrawer = function() {
     document.getElementById("drawer-overlay").classList.remove("active");
-    const audioPlayer = document.getElementById("drawer-audio-element");
-    audioPlayer.pause();
     stopSynthMelody();
+    
+    // Stop standard audio if currently rendered
+    const audioPlayer = document.getElementById("drawer-audio-element");
+    if (audioPlayer) {
+        audioPlayer.pause();
+    }
+    
+    // Clear audio player container to destroy YouTube iframe elements and stop background audio
+    const container = document.getElementById("audio-player-container");
+    if (container) container.innerHTML = "";
+
     activeMemberId = null;
 };
-
-// Custom manual play triggers for synth if no custom track is loaded
-const audioPlayerEl = document.getElementById("drawer-audio-element");
-audioPlayerEl.addEventListener("play", () => {
-    if (!audioPlayerEl.src) {
-        playSynthMelody(activeMemberId);
-    }
-});
-audioPlayerEl.addEventListener("pause", () => {
-    stopSynthMelody();
-});
 
 // 6. In-place Editing Event Binding (Right-Click & Hold)
 let touchTimer = null;
@@ -408,10 +446,8 @@ function triggerAudioUpload(memberId) {
             const audioTitle = document.getElementById("drawer-audio-title");
             if (audioTitle) audioTitle.textContent = title;
             
-            const audioPlayer = document.getElementById("drawer-audio-element");
-            audioPlayer.src = trimmed;
-            audioPlayer.style.display = "block";
-            audioPlayer.play();
+            // Reload player based on new URL (YouTube vs HTML5)
+            loadAudioPlayer(MEMBERS_DATA[memberId]);
         }
     } else {
         alert("Invalid input! Please paste a link starting with http:// or https://, or type '1' to upload a file.");
@@ -513,10 +549,8 @@ audioUploader.addEventListener("change", (e) => {
                 const audioTitle = document.getElementById("drawer-audio-title");
                 if (audioTitle) audioTitle.textContent = file.name;
                 
-                const audioPlayer = document.getElementById("drawer-audio-element");
-                audioPlayer.src = dataUrl;
-                audioPlayer.style.display = "block";
-                audioPlayer.play();
+                // Re-render local file player
+                loadAudioPlayer(MEMBERS_DATA[uploadTargetMember]);
             }
         };
         reader.readAsDataURL(file);

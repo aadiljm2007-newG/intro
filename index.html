@@ -100,7 +100,10 @@
                         <span class="audio-icon">🎵</span>
                         <span id="drawer-audio-title" data-member="" data-field="drawer-song-title">Default Synth Track</span>
                     </div>
-                    <audio id="drawer-audio-element" controls class="custom-audio-player"></audio>
+                    <!-- Container to swap between HTML5 Audio and YouTube Iframe -->
+                    <div id="audio-player-container" style="margin-top: 8px;">
+                        <audio id="drawer-audio-element" controls class="custom-audio-player"></audio>
+                    </div>
                 </div>
 
                 <hr class="drawer-divider">
