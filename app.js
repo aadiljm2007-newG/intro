@@ -627,17 +627,19 @@ async function initDatabase() {
             .channel('realtime:team_directory')
             .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'team_directory' }, payload => {
                 console.log("Real-time cloud sync event triggered.");
-                MEMBERS_DATA = payload.new.data;
-                initPage();
-                
-                if (activeMemberId) {
-                    const updatedMember = MEMBERS_DATA[activeMemberId];
-                    document.getElementById("drawer-img").src = updatedMember.image;
-                    document.getElementById("drawer-name").textContent = updatedMember.name;
-                    document.getElementById("drawer-role").textContent = updatedMember.role;
-                    document.getElementById("drawer-bio").textContent = updatedMember.bio;
-                    document.getElementById("drawer-audio-title").textContent = updatedMember.songTitle;
-                    renderDrawerStats(activeMemberId, updatedMember);
+                if (payload.new && payload.new.data) {
+                    MEMBERS_DATA = payload.new.data;
+                    initPage();
+                    
+                    if (activeMemberId) {
+                        const updatedMember = MEMBERS_DATA[activeMemberId];
+                        document.getElementById("drawer-img").src = updatedMember.image;
+                        document.getElementById("drawer-name").textContent = updatedMember.name;
+                        document.getElementById("drawer-role").textContent = updatedMember.role;
+                        document.getElementById("drawer-bio").textContent = updatedMember.bio;
+                        document.getElementById("drawer-audio-title").textContent = updatedMember.songTitle;
+                        renderDrawerStats(activeMemberId, updatedMember);
+                    }
                 }
             })
             .subscribe();
