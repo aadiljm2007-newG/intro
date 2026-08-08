@@ -197,7 +197,7 @@ function loadAudioPlayer(data) {
     if (ytId) {
         // Render YouTube Embed Iframe
         container.innerHTML = `
-            <iframe id="drawer-yt-element" width="100%" height="80" 
+            <iframe id="drawer-yt-element" width="100%" height="180" 
                 src="https://www.youtube.com/embed/${ytId}?autoplay=0" 
                 frameborder="0" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
